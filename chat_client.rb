@@ -31,11 +31,13 @@ class ChatClient < EM::Connection
   end
   
   def self.run(host, port)
-    EM.connect(host, port, ChatClient) do |client|
-      EM.open_keyboard(KeyboardHandler, client.queue)
-    end
+    EM.run {
+      EM.connect(host, port, ChatClient) do |client|
+        EM.open_keyboard(KeyboardHandler, client.queue)
+      end
+      puts "Chat client connecting to #{host}:#{port}"
+    }
   end
-  
 end
 
 class KeyboardHandler < EM::Connection
@@ -52,6 +54,4 @@ class KeyboardHandler < EM::Connection
   end
 end
 
-EM.run {
-  ChatClient.run('127.0.0.1', 8081)
-}
+ChatClient.run('127.0.0.1', 8081)

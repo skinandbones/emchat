@@ -1,22 +1,21 @@
 require 'eventmachine'
 
 class ChatServer
-  attr_accessor :host
-  attr_accessor :port
-  attr_accessor :connections
+  attr_reader :connections
   
-  def initialize(host, port)
-    self.host         = host
-    self.port         = port
-    self.connections  = []
+  def initialize()
+    @connections  = []
   end
   
-  def start
-    EM.start_server(host, port, ChatServerConnection) do |conn|
-      conn.server = self
-      self.connections << conn
-    end
-    puts "Chat server started on #{host}:#{port}"
+  def self.run(host, port)
+    server = self.new
+    EventMachine::run {
+      EM.start_server(host, port, ChatServerConnection) do |conn|
+        conn.server = server
+        server.connections << conn
+      end
+      puts "Chat server started on #{host}:#{port}"
+    }
   end
 end
 
@@ -44,7 +43,4 @@ class ChatServerConnection < EM::Connection
   end
 end
 
-
-EventMachine::run {
-  ChatServer.new('0.0.0.0', 8081).start
-}
+ChatServer.run('0.0.0.0', 8081)
